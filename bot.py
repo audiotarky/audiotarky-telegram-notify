@@ -1,20 +1,14 @@
-import time
-import re
 import asyncio
 import json
-import logging
+import re
+import time
 from pathlib import Path
+
 import feedparser
 from telegram import Bot
-from telegram.helpers import escape_markdown
-
-logging.basicConfig(
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO
-)
 
 
 async def message(bot, message="hello world", channel=0):
-    print(message)
     async with bot:
         await bot.send_message(text=message, chat_id=channel, parse_mode="MarkdownV2")
 
