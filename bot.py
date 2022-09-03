@@ -6,11 +6,22 @@ from pathlib import Path
 
 import feedparser
 from telegram import Bot
+import requests
 
 
 async def message(bot, message="hello world", channel=0):
     async with bot:
         await bot.send_message(text=message, chat_id=channel, parse_mode="MarkdownV2")
+
+
+def send_dischord(the_message, token, channel):
+    the_url = f"https://discord.com/api/v9/channels/{channel}/messages"
+    header = {
+        "authorization": f"Bot {token}",
+    }
+
+    payload = {"content": f"{the_message}", "author": {"pinned": True}}
+    requests.post(the_url, data=payload, headers=header)
 
 
 if __name__ == "__main__":
@@ -29,7 +40,11 @@ if __name__ == "__main__":
             msg = msg.replace(".", "\.")
             msg += f"({item['link']})"
             asyncio.run(message(bot, msg, channel))
+            send_dischord(
+                f"{item['title']} - ({item['link']})",
+                creds["dischord"]["token"],
+                creds["dischord"]["release_announce"],
+            )
     creds["last_update"] = time.strftime(time_fmt, time.localtime())
-
     with creds_file.open("w", encoding="UTF-8") as target:
         json.dump(creds, target)
