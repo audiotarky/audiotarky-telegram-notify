@@ -35,10 +35,12 @@ if __name__ == "__main__":
 
     for item in reversed(feedparser.parse(creds["url"]).entries):
         if item["published_parsed"] > date:
-            msg = re.sub(r"(.*from )(.*)", r"\1[\2]", item["title"])
+            msg = re.sub(r"(.*from )(.*) \| (.*)", r"\1[\2](LINK) | \3", item["title"])
             msg = msg.replace("-", "\-")
             msg = msg.replace(".", "\.")
-            msg += f"({item['link']})"
+            msg = msg.replace("(LINK)", f"({item['link']})")
+            print(item["title"])
+            print(msg)
             asyncio.run(message(bot, msg, channel))
             send_dischord(
                 f"{item['title']} - ({item['link']})",
