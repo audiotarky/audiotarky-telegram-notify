@@ -32,13 +32,14 @@ if __name__ == "__main__":
     channel = int(creds["telegram"]["channel"])
     date = time.strptime(creds["last_update"], time_fmt)
     bot = Bot(token)
-
+    seen = creds.get("seen", [])
     for item in reversed(feedparser.parse(creds["url"]).entries):
-        if item["published_parsed"] > date:
+        if item["link"] not in creds.get("seen", []):
             msg = re.sub(r"(.*from )(.*) \| (.*)", r"\1[\2](LINK) | \3", item["title"])
             msg = msg.replace("-", "\-")
             msg = msg.replace(".", "\.")
             msg = msg.replace("(LINK)", f"({item['link']})")
+            msg = msg.replace("|", "\|")
             print(item["title"])
             print(msg)
             asyncio.run(message(bot, msg, channel))
@@ -47,6 +48,9 @@ if __name__ == "__main__":
                 creds["dischord"]["token"],
                 creds["dischord"]["release_announce"],
             )
+            seen.append(item["link"])
+
     creds["last_update"] = time.strftime(time_fmt, time.localtime())
+    creds["seen"] = seen[-10:]
     with creds_file.open("w", encoding="UTF-8") as target:
         json.dump(creds, target)
