@@ -5,6 +5,7 @@ import time
 from pathlib import Path
 
 import feedparser
+from mastodon import Mastodon
 from telegram import Bot
 import requests
 
@@ -24,6 +25,18 @@ def send_dischord(the_message, token, channel):
     requests.post(the_url, data=payload, headers=header)
 
 
+def send_mastodon(the_message, creds):
+    mastodon = Mastodon(
+        client_id="pytooter_clientcred.secret",
+    )
+    mastodon.log_in(
+        creds["mastodon"]["email"],
+        creds["mastodon"]["password"],
+        to_file=creds["mastodon"]["secret_file"],
+    )
+    mastodon.toot(the_message)
+
+
 if __name__ == "__main__":
     time_fmt = "%a, %d %b %Y %H:%M:%S +0000"
     creds_file = Path("creds.json")
@@ -33,7 +46,9 @@ if __name__ == "__main__":
     date = time.strptime(creds["last_update"], time_fmt)
     bot = Bot(token)
     seen = creds.get("seen", [])
+    print("fetching feed")
     for item in reversed(feedparser.parse(creds["url"]).entries):
+        print(item["title"])
         if item["link"] not in creds.get("seen", []):
             msg = re.sub(r"(.*from )(.*) \| (.*)", r"\1[\2](LINK) | \3", item["title"])
             msg = msg.replace("-", "\-")
@@ -43,11 +58,13 @@ if __name__ == "__main__":
             print(item["title"])
             print(msg)
             asyncio.run(message(bot, msg, channel))
+            plain_msg = f"{item['title']} - ({item['link']})"
             send_dischord(
-                f"{item['title']} - ({item['link']})",
+                plain_msg,
                 creds["dischord"]["token"],
                 creds["dischord"]["release_announce"],
             )
+            send_mastodon(plain_msg, creds)
             seen.append(item["link"])
 
     creds["last_update"] = time.strftime(time_fmt, time.localtime())
