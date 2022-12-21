@@ -48,22 +48,25 @@ if __name__ == "__main__":
     seen = creds.get("seen", [])
     print("fetching feed")
     for item in reversed(feedparser.parse(creds["url"]).entries):
-        print(item["title"])
         if item["link"] not in creds.get("seen", []):
             msg = re.sub(r"(.*from )(.*) \| (.*)", r"\1[\2](LINK) | \3", item["title"])
             msg = msg.replace("-", "\-")
             msg = msg.replace(".", "\.")
-            msg = msg.replace("(LINK)", f"({item['link']})")
+            msg = msg.replace(
+                "(LINK)",
+                f"({item['link']}?utm_campaign=new_release&utm_source=telegram)",
+            )
             msg = msg.replace("|", "\|")
             print(item["title"])
             print(msg)
             asyncio.run(message(bot, msg, channel))
-            plain_msg = f"{item['title']} - ({item['link']})"
+            plain_msg = f"{item['title']} - ({item['link']}?utm_campaign=new_release&utm_source=dischord)"
             send_dischord(
                 plain_msg,
                 creds["dischord"]["token"],
                 creds["dischord"]["release_announce"],
             )
+            plain_msg = f"{item['title']} - ({item['link']}?utm_campaign=new_release&utm_source=mastodon)"
             send_mastodon(plain_msg, creds)
             seen.append(item["link"])
 
