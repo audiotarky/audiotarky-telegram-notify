@@ -60,7 +60,7 @@ if __name__ == "__main__":
 
     print("fetching feed")
     for item in reversed(feedparser.parse(creds["url"]).entries):
-        if item["link"] not in creds.get("seen", []):
+        if item["link"] not in seen:
             msg = re.sub(r"(.*from )(.*) \| (.*)", r"\1[\2](LINK) | \3", item["title"])
             msg = msg.replace("-", "\-")
             msg = msg.replace(".", "\.")
