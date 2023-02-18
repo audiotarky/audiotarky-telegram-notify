@@ -67,7 +67,7 @@ if __name__ == "__main__":
             msg = msg.replace("(", "\(")
             msg = msg.replace(")", "\)")
             msg = msg.replace(
-                "(LINK)",
+                "\(LINK\)",
                 f"({item['link']}?utm_campaign=new_release&utm_source=telegram)",
             )
             msg = msg.replace("|", "\|")
