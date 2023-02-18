@@ -64,6 +64,8 @@ if __name__ == "__main__":
             msg = re.sub(r"(.*from )(.*) \| (.*)", r"\1[\2](LINK) | \3", item["title"])
             msg = msg.replace("-", "\-")
             msg = msg.replace(".", "\.")
+            msg = msg.replace("(", "\(")
+            msg = msg.replace(")", "\)")
             msg = msg.replace(
                 "(LINK)",
                 f"({item['link']}?utm_campaign=new_release&utm_source=telegram)",
