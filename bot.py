@@ -62,10 +62,9 @@ if __name__ == "__main__":
     for item in reversed(feedparser.parse(creds["url"]).entries):
         if item["link"] not in seen:
             msg = re.sub(r"(.*from )(.*) \| (.*)", r"\1[\2](LINK) | \3", item["title"])
-            msg = msg.replace("-", "\-")
-            msg = msg.replace(".", "\.")
-            msg = msg.replace("(", "\(")
-            msg = msg.replace(")", "\)")
+            for char in "-.()!":
+                msg = msg.replace(char, f"\{char}")
+
             msg = msg.replace(
                 "\(LINK\)",
                 f"({item['link']}?utm_campaign=new_release&utm_source=telegram)",
@@ -73,17 +72,20 @@ if __name__ == "__main__":
             msg = msg.replace("|", "\|")
             print(item["title"])
             print(msg)
-            if not args.dryrun:
-                asyncio.run(message(bot, msg, channel))
-                plain_msg = f"{item['title']} - ({item['link']}?utm_campaign=new_release&utm_source=dischord)"
-                send_dischord(
-                    plain_msg,
-                    creds["dischord"]["token"],
-                    creds["dischord"]["release_announce"],
-                )
-                plain_msg = f"{item['title']} - ({item['link']}?utm_campaign=new_release&utm_source=mastodon)"
-                send_mastodon(plain_msg, creds)
-            seen.append(item["link"])
+            try:
+                if not args.dryrun:
+                    asyncio.run(message(bot, msg, channel))
+                    plain_msg = f"{item['title']} - ({item['link']}?utm_campaign=new_release&utm_source=dischord)"
+                    send_dischord(
+                        plain_msg,
+                        creds["dischord"]["token"],
+                        creds["dischord"]["release_announce"],
+                    )
+                    plain_msg = f"{item['title']} - ({item['link']}?utm_campaign=new_release&utm_source=mastodon)"
+                    send_mastodon(plain_msg, creds)
+                seen.append(item["link"])
+            except:
+                pass
 
     creds["last_update"] = time.strftime(time_fmt, time.localtime())
     creds["seen"] = zlib.compress(json.dumps(seen[-60:]).encode("utf-8")).hex()
