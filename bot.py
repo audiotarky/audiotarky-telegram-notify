@@ -88,6 +88,6 @@ if __name__ == "__main__":
                 pass
 
     creds["last_update"] = time.strftime(time_fmt, time.localtime())
-    creds["seen"] = zlib.compress(json.dumps(seen[-60:]).encode("utf-8")).hex()
+    creds["seen"] = zlib.compress(json.dumps(seen).encode("utf-8")).hex()
     with creds_file.open("w", encoding="UTF-8") as target:
         json.dump(creds, target, indent=4)
